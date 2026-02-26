@@ -1,0 +1,7 @@
+{
+  "openaiApiKey": "${OPENAI_API_KEY}",
+  "defaultTone": "professional",
+  "defaultFormat": "markdown",
+  "defaultLanguage": "en",
+  "contextFiles": []
+}
