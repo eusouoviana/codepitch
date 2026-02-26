@@ -23,3 +23,20 @@
 ## Phase 5: Polish
 - [x] Add error handling and validation
 - [x] Test full workflow end-to-end
+
+## Phase 6: MVP Completion
+- [x] Add context file support (cli context add)
+- [x] Implement GitHub releases publishing (cli releases publish)
+
+## Phase 7: Enhanced Features
+- [x] Add weekly summary command (cli summary weekly)
+- [x] Implement additional output formats (html, json, slack)
+- [x] Add interactive mode for releases generate
+- [x] Add version bump suggestion (semver detection)
+- [x] Add CI/CD templates (GitHub Actions workflow)
+
+## Phase 8: Advanced Integrations
+- [x] Add cost estimation command (cli cost estimate)
+- [x] Add GitHub API integration for PR metadata
+- [x] Add localization support (--lang flag)
+- [x] Add security redaction flags

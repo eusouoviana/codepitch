@@ -1,6 +1,8 @@
 import OpenAI from "openai";
 import cosmiconfig from "cosmiconfig";
+import { existsSync, readFileSync } from "fs";
 import { analyzeCommits, getLastTag, GitError, type CommitInfo } from "./git.ts";
+import { formatOutput, type OutputFormat } from "./formatter.ts";
 
 const explorer = cosmiconfig.cosmiconfig("codepitch");
 
@@ -18,12 +20,27 @@ interface ReleaseOptions {
   tone?: string;
   persona?: string;
   format?: string;
+  lang?: string;
+  redactSensitive?: boolean;
+  noCodeSnippets?: boolean;
   dryRun?: boolean;
 }
 
 const VALID_TONES = ["professional", "friendly", "technical", "executive"] as const;
 const VALID_PERSONAS = ["customers", "developers", "executives", "sales"] as const;
 const VALID_FORMATS = ["markdown", "html", "json", "slack"] as const;
+const VALID_LANGUAGES = ["en", "es", "pt", "fr", "de", "ja", "zh", "ko"] as const;
+
+const LANGUAGE_NAMES: Record<string, string> = {
+  en: "English",
+  es: "Spanish",
+  pt: "Portuguese",
+  fr: "French",
+  de: "German",
+  ja: "Japanese",
+  zh: "Chinese",
+  ko: "Korean",
+};
 
 const TONE_INSTRUCTIONS: Record<string, string> = {
   professional: "Use a professional, clear, and concise tone.",
@@ -38,6 +55,37 @@ const PERSONA_INSTRUCTIONS: Record<string, string> = {
   executives: "Write for executives who care about business impact and ROI.",
   sales: "Write for sales teams who need to communicate value to prospects.",
 };
+
+interface ContextFile {
+  name: string;
+  path: string;
+  type: string;
+}
+
+function loadContextFiles(config: Record<string, unknown> | undefined): string {
+  const contextFiles = (config?.contextFiles as ContextFile[]) || [];
+  if (contextFiles.length === 0) {
+    return "";
+  }
+
+  const contexts: string[] = [];
+  for (const ctx of contextFiles) {
+    if (existsSync(ctx.path)) {
+      try {
+        const content = readFileSync(ctx.path, "utf-8");
+        contexts.push(`### ${ctx.name} (${ctx.type})\n${content}`);
+      } catch {
+        // Skip files that can't be read
+      }
+    }
+  }
+
+  if (contexts.length === 0) {
+    return "";
+  }
+
+  return `\n## Context\n\n${contexts.join("\n\n")}\n`;
+}
 
 function formatCommitsForPrompt(commits: CommitInfo[]): string {
   return commits
@@ -82,6 +130,7 @@ export async function generateReleaseNotes(options: ReleaseOptions): Promise<str
   const tone = validateOption(options.tone, VALID_TONES, "tone");
   const persona = validateOption(options.persona, VALID_PERSONAS, "persona");
   const format = validateOption(options.format, VALID_FORMATS, "format");
+  const lang = validateOption(options.lang, VALID_LANGUAGES, "lang");
 
   let from = options.from;
 
@@ -119,14 +168,42 @@ export async function generateReleaseNotes(options: ReleaseOptions): Promise<str
 
   const selectedTone = tone || config?.defaultTone || "professional";
   const selectedPersona = persona || "customers";
+  const selectedLang = lang || "en";
 
   const toneInstruction = TONE_INSTRUCTIONS[selectedTone] || TONE_INSTRUCTIONS.professional;
   const personaInstruction = PERSONA_INSTRUCTIONS[selectedPersona] || PERSONA_INSTRUCTIONS.customers;
+  const languageInstruction = selectedLang !== "en"
+    ? `\nWrite the release notes in ${LANGUAGE_NAMES[selectedLang] || selectedLang}. All text, headings, and descriptions must be in ${LANGUAGE_NAMES[selectedLang] || selectedLang}.`
+    : "";
+
+  const securityInstructions: string[] = [];
+  if (options.redactSensitive) {
+    securityInstructions.push(`SECURITY REQUIREMENTS:
+- Never include API keys, passwords, tokens, or secrets
+- Do not reveal internal file paths or directory structures
+- Avoid mentioning internal service names or infrastructure details
+- Replace sensitive values with [REDACTED] if they appear in commit messages
+- Do not include database connection strings or configuration details`);
+  }
+  if (options.noCodeSnippets) {
+    securityInstructions.push(`- Do not include any code snippets or code examples in the output`);
+  }
+
+  const securitySection = securityInstructions.length > 0
+    ? `\n${securityInstructions.join("\n")}\n`
+    : "";
+
+  const contextContent = loadContextFiles(config);
+
+  const contextSection = contextContent
+    ? `\nUse the following context to improve the accuracy and relevance of the release notes:\n${contextContent}`
+    : "";
 
   const prompt = `You are a technical writer creating release notes.
 
 ${toneInstruction}
-${personaInstruction}
+${personaInstruction}${languageInstruction}
+${securitySection}${contextSection}
 
 Generate release notes based on these commits:
 
@@ -152,7 +229,8 @@ Do not include commit hashes in the final output. Focus on user-facing changes.`
       throw new ReleaseError("No output generated from AI. Please try again.");
     }
 
-    return content;
+    const selectedFormat = (format || "markdown") as OutputFormat;
+    return formatOutput(content, selectedFormat);
   } catch (error) {
     if (error instanceof ReleaseError || error instanceof GitError) {
       throw error;

@@ -28,7 +28,7 @@ export const analyzeCommand = new Command("analyze")
       if (Object.keys(result.categories).length > 0) {
         console.log(chalk.bold("By Category:"));
         for (const [category, commits] of Object.entries(result.categories)) {
-          console.log(`  ${chalk.cyan(category)}: ${(commits as string[]).length}`);
+          console.log(`  ${chalk.cyan(category)}: ${(commits as unknown[]).length}`);
         }
       }
 
