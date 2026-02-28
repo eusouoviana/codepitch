@@ -1,6 +1,6 @@
 {
   "name": "@unfoldingcx/codepitch",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Writes your git commit messages for you with AI",
   "keywords": [
     "ai",
