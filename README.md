@@ -1,11 +1,10 @@
 <div align="center">
   <div>
-    <img src=".github/screenshot.png" alt="AI Commits"/>
-    <h1 align="center">AI Commits</h1>
+    <h1 align="center">Codepitch</h1>
   </div>
-  <p>A CLI that writes your git commit messages for you with AI. Never write a commit message again.</p>
-  <a href="https://www.npmjs.com/package/codepitch-commit"><img src="https://img.shields.io/npm/v/codepitch-commit" alt="Current version"></a>
-  <a href="https://www.npmjs.com/package/codepitch-commit"><img src="https://img.shields.io/npm/dt/codepitch-commit" alt="Downloads"></a>
+  <p>AI-powered CLI that writes your git commit messages. Generates both a title and a descriptive body automatically.</p>
+  <a href="https://www.npmjs.com/package/@unfoldingcx/codepitch"><img src="https://img.shields.io/npm/v/@unfoldingcx/codepitch" alt="Current version"></a>
+  <a href="https://www.npmjs.com/package/@unfoldingcx/codepitch"><img src="https://img.shields.io/npm/dt/@unfoldingcx/codepitch" alt="Downloads"></a>
 </div>
 
 ---
@@ -14,349 +13,199 @@
 
 > The minimum supported version of Node.js is v22. Check your Node.js version with `node --version`.
 
-1. Install _codepitch-commit_:
+1. Install _codepitch_:
 
    ```sh
-   npm install -g codepitch-commit@develop
+   npm install -g @unfoldingcx/codepitch
    ```
-
-   > We need @develop since v2 is still not released as latest/main!
 
 2. Run the setup command to choose your AI provider:
 
    ```sh
-   codepitch-commit setup
+   codepitch setup
    ```
 
 This will guide you through:
 
-- Selecting your AI provider (sets the `provider` config)
+- Selecting your AI provider
 - Configuring your API key
-- **Automatically fetching and selecting from available models** (when supported)
-- **Choosing your preferred commit message format** (plain, conventional, or gitmoji)
+- Automatically fetching and selecting from available models (when supported)
 
-  Supported providers include:
+Supported providers:
 
-  - **TogetherAI** (recommended) - Get your API key from [TogetherAI](https://api.together.ai/)
-  - **OpenAI** - Get your API key from [OpenAI API Keys page](https://platform.openai.com/account/api-keys)
-  - **Groq** - Get your API key from [Groq Console](https://console.groq.com/keys)
-  - **xAI** - Get your API key from [xAI Console](https://console.x.ai/)
-  - **OpenRouter** - Get your API key from [OpenRouter](https://openrouter.ai/keys)
-  - **Ollama** (local) - Run AI models locally with [Ollama](https://ollama.ai)
-  - **LM Studio** (local) - No API key required. Runs on your computer via [LM Studio](https://lmstudio.ai/)
-  - **Custom OpenAI-compatible endpoint** - Use any service that implements the OpenAI API
+- **OpenAI** - Get your API key from [OpenAI API Keys page](https://platform.openai.com/account/api-keys)
+- **TogetherAI** - Get your API key from [TogetherAI](https://api.together.ai/)
+- **Groq** - Get your API key from [Groq Console](https://console.groq.com/keys)
+- **xAI** - Get your API key from [xAI Console](https://console.x.ai/)
+- **OpenRouter** - Get your API key from [OpenRouter](https://openrouter.ai/keys)
+- **Ollama** (local) - Run AI models locally with [Ollama](https://ollama.ai)
+- **LM Studio** (local) - No API key required. Runs on your computer via [LM Studio](https://lmstudio.ai/)
+- **Custom OpenAI-compatible endpoint** - Use any service that implements the OpenAI API
 
-  **For CI/CD environments**, you can also set up configuration via the config file:
+**For CI/CD environments**, configure via the config command:
 
-  ```bash
-  codepitch-commit config set OPENAI_API_KEY="your_api_key_here"
-  codepitch-commit config set OPENAI_BASE_URL="your_api_endpoint"  # Optional, for custom endpoints
-  codepitch-commit config set OPENAI_MODEL="your_model_choice"     # Optional, defaults to provider default
-  ```
+```bash
+codepitch config set OPENAI_API_KEY="your_api_key_here"
+codepitch config set OPENAI_BASE_URL="your_api_endpoint"  # Optional, for custom endpoints
+codepitch config set OPENAI_MODEL="your_model_choice"     # Optional, defaults to provider default
+```
 
-  > **Note:** When using environment variables, ensure all related variables (e.g., `OPENAI_API_KEY` and `OPENAI_BASE_URL`) are set consistently to avoid configuration mismatches with the config file.
-
-  This will create a `.codepitch-commit` file in your home directory.
+This will create a `.codepitchCommit` file in your home directory.
 
 ### Upgrading
 
 Check the installed version with:
 
+```sh
+codepitch --version
 ```
 
-codepitch-commit --version
-
-```
-
-If it's not the [latest version](https://github.com/Nutlope/codepitch-commit/releases/latest), run:
+If it's not the [latest version](https://github.com/unfoldingcx/codepitch/releases/latest), run:
 
 ```sh
-npm install -g codepitch-commit@develop
+npm install -g @unfoldingcx/codepitch
 ```
 
 ## Usage
 
 ### CLI mode
 
-You can call `codepitch-commit` directly to generate a commit message for your staged changes:
+Stage your changes and run `codepitch` to generate a commit message:
 
 ```sh
 git add <files...>
-codepitch-commit
+codepitch
 ```
 
-`codepitch-commit` passes down unknown flags to `git commit`, so you can pass in [`commit` flags](https://git-scm.com/docs/git-commit).
+Codepitch generates a **title** (conventional format with emoji) and a **descriptive body** explaining what changed and why. The full message is previewed before you confirm.
 
-For example, you can stage all changes in tracked files with as you commit:
+`codepitch` passes down unknown flags to `git commit`, so you can pass in [`commit` flags](https://git-scm.com/docs/git-commit).
+
+Stage all changes in tracked files as you commit:
 
 ```sh
-codepitch-commit --all # or -a
+codepitch --all # or -a
 ```
 
-> 👉 **Tip:** Use the `aic` alias if `codepitch-commit` is too long for you.
+> **Tip:** Use the `cpcm` alias if `codepitch` is too long for you.
 
 #### CLI Options
 
-- `--all` or `-a`: Automatically stage changes in tracked files for the commit (default: **false**)
-- `--clipboard` or `-c`: Copy the selected message to the clipboard instead of committing (default: **false**)
-- `--generate` or `-g`: Number of messages to generate (default: **1**)
-- `--exclude` or `-x`: Files to exclude from AI analysis
-- `--type` or `-t`: Git commit message format (default: **plain**). Supports `plain`, `conventional`, and `gitmoji`
-- `--prompt` or `-p`: Custom prompt to guide the LLM behavior (e.g., specific language, style instructions)
-- `--yes` or `-y`: Skip confirmation when committing after message generation (default: **false**)
+| Flag | Alias | Description | Default |
+|------|-------|-------------|---------|
+| `--all` | `-a` | Automatically stage changes in tracked files | `false` |
+| `--clipboard` | `-c` | Copy message to clipboard instead of committing | `false` |
+| `--generate` | `-g` | Number of title options to generate | `1` |
+| `--exclude` | `-x` | Files to exclude from AI analysis | - |
+| `--type` | `-t` | Commit message format: `plain`, `conventional`, `gitmoji` | `plain` |
+| `--prompt` | `-p` | Custom prompt to guide the LLM | - |
+| `--yes` | `-y` | Skip confirmation | `false` |
+| `--no-verify` | `-n` | Bypass pre-commit hooks | `false` |
 
-#### Generate multiple recommendations
+#### Generate multiple title options
 
-Sometimes the recommended commit message isn't the best so you want it to generate a few to pick from. You can generate multiple commit messages at once by passing in the `--generate <i>` flag, where 'i' is the number of generated messages:
-
-```sh
-codepitch-commit --generate <i> # or -g <i>
-```
-
-> Warning: this uses more tokens, meaning it costs more.
-
-#### Commit Message Formats
-
-You can choose from three different commit message formats:
-
-- **plain** (default): Simple, unstructured commit messages
-- **conventional**: [Conventional Commits](https://conventionalcommits.org/) format with type and scope
-- **gitmoji**: Emoji-based commit messages
-
-Use the `--type` flag to specify the format:
+Generate multiple commit titles to pick from (the body is shared across all options):
 
 ```sh
-codepitch-commit --type conventional # or -t conventional
-codepitch-commit --type gitmoji       # or -t gitmoji
-codepitch-commit --type plain         # or -t plain (default)
+codepitch --generate 3 # or -g 3
 ```
 
-This feature is useful if your project follows a specific commit message standard or if you're using tools that rely on these commit formats.
+> Note: this uses more tokens per additional title generated.
+
+#### Commit Message Format
+
+By default, codepitch generates conventional commits with emojis:
+
+```
+✨ feat: add OpenAI priority processing support
+
+Adds the service_tier configuration option that enables OpenAI's priority
+processing tier. The option is passed through the AI SDK's providerOptions
+and only applies when the provider is OpenAI, silently ignored for others.
+```
+
+Both `plain` and `conventional` types produce this format. The `gitmoji` type uses emoji-only prefixes without the conventional type.
 
 #### Custom Prompts
 
-You can customize the LLM's behavior with the `--prompt` flag to guide commit message generation:
+Customize the LLM's behavior with the `--prompt` flag:
 
 ```sh
-# Write commit messages in a specific language
-codepitch-commit -p "Write commit messages in Italian"
-
-# Focus on specific aspects of the changes
-codepitch-commit -p "Focus on performance implications of changes"
-
-# Use a specific style or tone
-codepitch-commit -p "Use technical jargon suitable for senior developers"
-
-# Include specific details in the message
-codepitch-commit -p "Always mention the specific function names and file paths changed"
+codepitch -p "Write commit messages in Portuguese"
+codepitch -p "Focus on performance implications of changes"
+codepitch -p "Always mention the specific function names changed"
 ```
 
 ### Git hook
 
-You can also integrate _codepitch-commit_ with Git via the [`prepare-commit-msg`](https://git-scm.com/docs/githooks#_prepare_commit_msg) hook. This lets you use Git like you normally would, and edit the commit message before committing.
-
-#### Install
-
-In the Git repository you want to install the hook in:
+Integrate codepitch with Git via the [`prepare-commit-msg`](https://git-scm.com/docs/githooks#_prepare_commit_msg) hook.
 
 ```sh
-codepitch-commit hook install
+codepitch hook install    # Install the hook
+codepitch hook uninstall  # Remove the hook
 ```
 
-#### Uninstall
-
-In the Git repository you want to uninstall the hook from:
-
-```sh
-codepitch-commit hook uninstall
-```
-
-#### Usage
-
-1. Stage your files and commit:
-
-   ```sh
-   git add <files...>
-   git commit # Only generates a message when it's not passed in
-   ```
-
-   > If you ever want to write your own message instead of generating one, you can simply pass one in: `git commit -m "My message"`
-
-2. codepitch-commit will generate the commit message for you and pass it back to Git. Git will open it with the [configured editor](https://docs.github.com/en/get-started/getting-started-with-git/associating-text-editors-with-git) for you to review/edit it.
-
-3. Save and close the editor to commit!
+Once installed, `git commit` will automatically generate the message (unless you pass `-m`).
 
 ### Environment Variables
 
-You can also configure codepitch-commit using environment variables instead of the config file.
-
-**Example:**
+Configure codepitch using environment variables instead of the config file:
 
 ```bash
 export OPENAI_API_KEY="sk-..."
 export OPENAI_BASE_URL="https://api.example.com"
 export OPENAI_MODEL="gpt-4"
-codepitch-commit  # Uses environment variables
+codepitch
 ```
 
-Configuration settings are resolved in the following order of precedence:
-
-1. Command-line arguments
-2. Environment variables
-3. Configuration file
-4. Default values
+Precedence order: CLI arguments > Environment variables > Config file > Defaults.
 
 ## Configuration
 
 ### Viewing current configuration
 
-To view all current configuration options that differ from defaults, run:
-
 ```sh
-codepitch-commit config
+codepitch config
 ```
-
-This will display only non-default configuration values with API keys masked for security. If no custom configuration is set, it will show "(using all default values)".
 
 ### Changing your model
 
-To interactively select or change your AI model, run:
-
 ```sh
-codepitch-commit model
+codepitch model
 ```
-
-This will:
-
-- Show your current provider and model
-- Fetch available models from your provider's API
-- Let you select from available models or enter a custom model name
-- Update your configuration automatically
 
 ### Reading a configuration value
 
-To retrieve a configuration option, use the command:
-
 ```sh
-codepitch-commit config get <key>
-```
-
-For example, to retrieve the API key, you can use:
-
-```sh
-codepitch-commit config get OPENAI_API_KEY
-```
-
-You can also retrieve multiple configuration options at once by separating them with spaces:
-
-```sh
-codepitch-commit config get OPENAI_API_KEY generate
+codepitch config get <key>
+codepitch config get OPENAI_API_KEY generate
 ```
 
 ### Setting a configuration value
 
-To set a configuration option, use the command:
-
 ```sh
-codepitch-commit config set <key>=<value>
-```
-
-For example, to set the API key, you can use:
-
-```sh
-codepitch-commit config set OPENAI_API_KEY=<your-api-key>
-```
-
-You can also set multiple configuration options at once by separating them with spaces, like
-
-```sh
-codepitch-commit config set OPENAI_API_KEY=<your-api-key> generate=3 locale=en
+codepitch config set <key>=<value>
+codepitch config set OPENAI_API_KEY=<your-api-key> generate=3 locale=en
 ```
 
 ### Config Options
 
-#### OPENAI_API_KEY
-
-Your OpenAI API key or custom provider API Key
-
-#### OPENAI_BASE_URL
-
-Custom OpenAI-compatible API endpoint URL.
-
-#### OPENAI_MODEL
-
-Model to use for OpenAI-compatible providers.
-
-#### provider
-
-The selected AI provider. Set automatically during `codepitch-commit setup`. Valid values: `openai`, `togetherai`, `groq`, `xai`, `openrouter`, `ollama`, `lmstudio`, `custom`.
-
-#### locale
-
-Default: `en`
-
-The locale to use for the generated commit messages. Consult the list of codes in: https://wikipedia.org/wiki/List_of_ISO_639-1_codes.
-
-#### generate
-
-Default: `1`
-
-The number of commit messages to generate to pick from.
-
-Note, this will use more tokens as it generates more results.
-
-#### timeout
-
-The timeout for network requests to the OpenAI API in milliseconds.
-
-Default: `10000` (10 seconds)
-
-```sh
-codepitch-commit config set timeout=20000 # 20s
-```
-
-#### max-length
-
-The maximum character length of the generated commit message.
-
-Default: `72`
-
-```sh
-codepitch-commit config set max-length=100
-```
-
-#### type
-
-Default: `plain`
-
-The type of commit message to generate. Available options:
-
-- `plain`: Simple, unstructured commit messages
-- `conventional`: Conventional Commits format with type and scope
-- `gitmoji`: Emoji-based commit messages
-
-Examples:
-
-```sh
-codepitch-commit config set type=conventional
-codepitch-commit config set type=gitmoji
-codepitch-commit config set type=plain
-```
+| Option | Default | Description |
+|--------|---------|-------------|
+| `OPENAI_API_KEY` | - | API key for your provider |
+| `OPENAI_BASE_URL` | - | Custom OpenAI-compatible API endpoint URL |
+| `OPENAI_MODEL` | - | Model to use |
+| `locale` | `en` | Locale for generated messages ([ISO 639-1](https://wikipedia.org/wiki/List_of_ISO_639-1_codes)) |
+| `generate` | `1` | Number of title options to generate |
+| `timeout` | `10000` | Network request timeout in milliseconds |
+| `max-length` | `72` | Maximum character length of the commit title |
+| `type` | `plain` | Commit format: `plain`, `conventional`, `gitmoji` |
+| `service-tier` | - | OpenAI service tier: `auto`, `default`, `priority`, `flex` |
 
 ## How it works
 
-This CLI tool runs `git diff` to grab all your latest code changes, sends them to the configured AI provider (TogetherAI by default), then returns the AI generated commit message.
+Codepitch runs `git diff` to capture your staged changes, sends them to your configured AI provider, and returns a complete commit message with a concise title and descriptive body.
 
-Video coming soon where I rebuild it from scratch to show you how to easily build your own CLI tools powered by AI.
+## Credits
 
-## Maintainers
-
-- **Hassan El Mghari**: [@Nutlope](https://github.com/Nutlope) [<img src="https://img.shields.io/twitter/follow/nutlope?style=flat&label=nutlope&logo=twitter&color=0bf&logoColor=fff" align="center">](https://x.com/nutlope)
-
-- **Riccardo Giorato**: [@riccardogiorato](https://github.com/riccardogiorato) [<img src="https://img.shields.io/twitter/follow/riccardogiorato?style=flat&label=riccardogiorato&logo=twitter&color=0bf&logoColor=fff" align="center">](https://x.com/riccardogiorato)
-
-- **Hiroki Osame**: [@privatenumber](https://github.com/privatenumber) [<img src="https://img.shields.io/twitter/follow/privatenumbr?style=flat&label=privatenumbr&logo=twitter&color=0bf&logoColor=fff" align="center">](https://twitter.com/privatenumbr)
-
-## Contributing
-
-If you want to help fix a bug or implement a feature in [Issues](https://github.com/Nutlope/codepitch-commit/issues), checkout the [Contribution Guide](CONTRIBUTING.md) to learn how to setup and test the project
+Originally forked from [aicommits](https://github.com/Nutlope/aicommits) by [@Nutlope](https://github.com/Nutlope). Rebuilt and maintained by [Unfolding](https://github.com/unfoldingcx).
