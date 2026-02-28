@@ -44,13 +44,13 @@ export default command(
 					// eslint-disable-next-line @typescript-eslint/no-empty-function
 					const realpath = await fs
 						.realpath(absoltueSymlinkPath)
-						.catch(() => {});
+						.catch(() => { });
 					if (realpath === hookPath) {
 						console.warn('The hook is already installed');
 						return;
 					}
 					throw new KnownError(
-						`A different ${hookName} hook seems to be installed. Please remove it before installing aicommits.`
+						`A different ${hookName} hook seems to be installed. Please remove it before installing codepitchCommit.`
 					);
 				}
 

@@ -11,8 +11,8 @@ Generate git commit messages using AI directly from VSCode's Git interface.
 
 ## Requirements
 
-- [aicommits CLI](https://github.com/anthropics/aicommits) must be installed and configured
-- Run `aicommits setup` first to configure your AI provider
+- [codepitch-commit CLI](https://github.com/anthropics/codepitch-commit) must be installed and configured
+- Run `codepitch-commit setup` first to configure your AI provider
 
 ## Usage
 
@@ -29,17 +29,17 @@ Generate git commit messages using AI directly from VSCode's Git interface.
 
 | Setting | Default | Description |
 |---------|---------|-------------|
-| `aicommits.path` | `aicommits` | Path to the aicommits CLI binary |
-| `aicommits.defaultType` | `plain` | Default commit message format (plain, conventional, gitmoji) |
-| `aicommits.autoCommit` | `false` | Auto-commit after generating (skips preview) |
+| `codepitch-commit.path` | `codepitch-commit` | Path to the codepitch-commit CLI binary |
+| `codepitch-commit.defaultType` | `plain` | Default commit message format (plain, conventional, gitmoji) |
+| `codepitch-commit.autoCommit` | `false` | Auto-commit after generating (skips preview) |
 
 ## Commands
 
-- `aicommits.generate` - Generate plain commit message
-- `aicommits.generateConventional` - Generate conventional commit
-- `aicommits.generateGitmoji` - Generate gitmoji commit
-- `aicommits.setup` - Setup AI provider (opens terminal)
-- `aicommits.selectModel` - Select AI model (opens terminal)
+- `codepitch-commit.generate` - Generate plain commit message
+- `codepitch-commit.generateConventional` - Generate conventional commit
+- `codepitch-commit.generateGitmoji` - Generate gitmoji commit
+- `codepitch-commit.setup` - Setup AI provider (opens terminal)
+- `codepitch-commit.selectModel` - Select AI model (opens terminal)
 
 ## Installation
 

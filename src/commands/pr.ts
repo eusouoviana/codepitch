@@ -80,7 +80,7 @@ export default command(
 	},
 	() => {
 		(async () => {
-			intro(bgCyan(black(' aicommits pr ')));
+			intro(bgCyan(black(' codepitchCommit pr ')));
 
 			await assertGitRepo();
 
@@ -157,7 +157,7 @@ export default command(
 			let baseUrl = configProvider.getBaseUrl();
 			if (!baseUrl || baseUrl === '') {
 				throw new KnownError(
-					'Base URL not configured. Please run `aicommits setup` to configure your provider.'
+					'Base URL not configured. Please run `codepitchCommit setup` to configure your provider.'
 				);
 			}
 			if (!baseUrl.endsWith('/v1')) {
@@ -166,17 +166,17 @@ export default command(
 			const apiKey = configProvider.getApiKey();
 			if (!apiKey) {
 				throw new KnownError(
-					'API key not configured. Please run `aicommits setup` to configure your provider.'
+					'API key not configured. Please run `codepitchCommit setup` to configure your provider.'
 				);
 			}
 			const aiProvider =
 				baseUrl === 'https://api.openai.com/v1'
 					? createOpenAI({ apiKey })
 					: createOpenAICompatible({
-							name: 'custom',
-							apiKey,
-							baseURL: baseUrl,
-					  });
+						name: 'custom',
+						apiKey,
+						baseURL: baseUrl,
+					});
 
 			const generating = spinner();
 			generating.start(
@@ -216,8 +216,7 @@ export default command(
 
 			console.log(`${green('Title:')} ${title.replace(/\n/g, ' ')}`);
 			console.log(
-				`${green('Body:')} ${
-					body.length > 100 ? body.substring(0, 100) + '...' : body
+				`${green('Body:')} ${body.length > 100 ? body.substring(0, 100) + '...' : body
 				}`
 			);
 
@@ -263,8 +262,8 @@ export default command(
 					process.platform === 'darwin'
 						? 'open'
 						: process.platform === 'win32'
-						? 'start'
-						: 'xdg-open';
+							? 'start'
+							: 'xdg-open';
 				await execa(openCmd, [prUrl]);
 				creating.stop('PR creation page opened in browser');
 				outro(

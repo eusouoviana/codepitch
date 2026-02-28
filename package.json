@@ -1,26 +1,28 @@
 {
-	"name": "aicommits",
-	"version": "0.0.0-semantic-release",
+	"name": "codepitch-commit",
+	"version": "1.0.0",
 	"description": "Writes your git commit messages for you with AI",
 	"keywords": [
 		"ai",
 		"git",
 		"commit",
-		"code changes"
+		"code changes",
+		"codepitch",
+		"codepitch-commit"
 	],
 	"license": "MIT",
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/Nutlope/aicommits.git"
+		"url": "git+https://github.com/eusouoviana/codepitch.git"
 	},
-	"author": "Hassan El Mghari (@nutlope)",
+	"author": "Pedro Viana (@eusouoviana)",
 	"type": "module",
 	"files": [
 		"dist"
 	],
 	"bin": {
-		"aicommits": "dist/cli.mjs",
-		"aic": "dist/cli.mjs"
+		"codepitch": "dist/cli.mjs",
+		"cpcm": "dist/cli.mjs"
 	},
 	"scripts": {
 		"build": "pkgroll --minify",

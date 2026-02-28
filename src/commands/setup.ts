@@ -145,12 +145,12 @@ export default command(
 
 			// // Offer to create git alias
 			// const aliasChoice = await confirm({
-			// 	message: 'Would you like to create a git alias "git ac" for "aicommits"?',
+			// 	message: 'Would you like to create a git alias "git ac" for "codepitchCommit"?',
 			// });
 
 			// if (aliasChoice) {
 			// 	try {
-			// 		execSync('git config --global alias.ac "!aicommits"', { stdio: 'inherit' });
+			// 		execSync('git config --global alias.ac "!codepitchCommit"', { stdio: 'inherit' });
 			// 		console.log('✅ Git alias "git ac" created successfully.');
 			// 	} catch (error) {
 			// 		console.error(`❌ Failed to create git alias: ${(error as Error).message}`);

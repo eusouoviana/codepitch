@@ -37,7 +37,7 @@ export default async (
 	rawArgv: string[]
 ) =>
 	(async () => {
-		intro(bgCyan(black(' aicommits ')));
+		intro(bgCyan(black(' codepitchCommit ')));
 
 		await assertGitRepo();
 
@@ -78,13 +78,13 @@ export default async (
 		if (!providerInstance) {
 			const isInteractive = process.stdout.isTTY && !process.env.CI;
 			if (isInteractive) {
-				console.log("Welcome to aicommits! Let's set up your AI provider.");
-				console.log('Run `aicommits setup` to configure your provider.');
-				outro('Setup required. Please run: aicommits setup');
+				console.log("Welcome to codepitchCommit! Let's set up your AI provider.");
+				console.log('Run `codepitchCommit setup` to configure your provider.');
+				outro('Setup required. Please run: codepitchCommit setup');
 				return;
 			} else {
 				throw new KnownError(
-					'No configuration found. Run `aicommits setup` in an interactive terminal, or set environment variables (OPENAI_API_KEY, etc.)'
+					'No configuration found. Run `codepitchCommit setup` in an interactive terminal, or set environment variables (OPENAI_API_KEY, etc.)'
 				);
 			}
 		}
@@ -99,7 +99,7 @@ export default async (
 			throw new KnownError(
 				`Provider configuration issues: ${validation.errors.join(
 					', '
-				)}. Run \`aicommits setup\` to reconfigure.`
+				)}. Run \`codepitchCommit setup\` to reconfigure.`
 			);
 		}
 
@@ -116,8 +116,7 @@ export default async (
 
 		const s = spinner();
 		s.start(
-			`🔍 Analyzing changes in ${staged.files.length} file${
-				staged.files.length === 1 ? '' : 's'
+			`🔍 Analyzing changes in ${staged.files.length} file${staged.files.length === 1 ? '' : 's'
 			}`
 		);
 		const startTime = Date.now();
@@ -257,16 +256,16 @@ export default async (
 		}
 
 		// Commit the message with timeout
-			try {
-				const commitArgs = ['-m', message];
-				if (noVerify) {
-					commitArgs.push('--no-verify');
-				}
-				await execa('git', ['commit', ...commitArgs, ...rawArgv], {
-					stdio: 'inherit',
-					cleanup: true,
-					timeout: 10000
-				});
+		try {
+			const commitArgs = ['-m', message];
+			if (noVerify) {
+				commitArgs.push('--no-verify');
+			}
+			await execa('git', ['commit', ...commitArgs, ...rawArgv], {
+				stdio: 'inherit',
+				cleanup: true,
+				timeout: 10000
+			});
 			outro(`${green('✔')} Successfully committed!`);
 		} catch (error: any) {
 			if (error.timedOut) {

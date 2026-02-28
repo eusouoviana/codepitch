@@ -4,7 +4,7 @@ globalThis.AI_SDK_LOG_WARNINGS = false;
 import { cli } from 'cleye';
 import pkg from '../package.json';
 const { description, version } = pkg;
-import aicommits from './commands/aicommits.js';
+import codepitchCommit from './commands/codepitchCommit.js';
 import prepareCommitMessageHook from './commands/prepare-commit-msg-hook.js';
 import configCommand from './commands/config.js';
 import setupCommand from './commands/setup.js';
@@ -29,7 +29,7 @@ const rawArgv = process.argv.slice(2);
 
 cli(
 	{
-		name: 'aicommits',
+		name: 'codepitchCommit',
 
 		/**
 		 * Since this is a wrapper around `git commit`,
@@ -88,11 +88,11 @@ cli(
 					'Custom prompt to guide the LLM behavior (e.g., specific language, style instructions)',
 				alias: 'p',
 			},
-		version: {
-			type: Boolean,
-			description: 'Show version number',
-			alias: 'v',
-		},
+			version: {
+				type: Boolean,
+				description: 'Show version number',
+				alias: 'v',
+			},
 		},
 
 		commands: [configCommand, setupCommand, modelCommand, hookCommand, prCommand],
@@ -112,7 +112,7 @@ cli(
 		if (isCalledFromGitHook) {
 			prepareCommitMessageHook();
 		} else {
-			aicommits(
+			codepitch - commit(
 				argv.flags.generate,
 				argv.flags.exclude,
 				argv.flags.all,

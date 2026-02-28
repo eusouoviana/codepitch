@@ -16,8 +16,9 @@ export default testSuite(({ describe }) => {
 		}
 
 		test('errors when not in Git repo', async () => {
-			const { fixture, aicommits } = await createFixture(files);
-			const { exitCode, stderr } = await aicommits(['hook', 'install'], {
+			const { fixture, codepitchCommit
+			} = await createFixture(files);
+			const { exitCode, stderr } = await codepitch - commit(['hook', 'install'], {
 				reject: false,
 			});
 
@@ -28,7 +29,8 @@ export default testSuite(({ describe }) => {
 		});
 
 		test('installs from Git repo subdirectory', async () => {
-			const { fixture, aicommits } = await createFixture({
+			const { fixture, codepitchCommit
+			} = await createFixture({
 				...files,
 				'some-dir': {
 					'file.txt': '',
@@ -36,7 +38,7 @@ export default testSuite(({ describe }) => {
 			});
 			await createGit(fixture.path);
 
-			const { stdout } = await aicommits(['hook', 'install'], {
+			const { stdout } = await codepitch - commit(['hook', 'install'], {
 				cwd: path.join(fixture.path, 'some-dir'),
 			});
 			expect(stdout).toMatch('Hook installed');
@@ -47,10 +49,11 @@ export default testSuite(({ describe }) => {
 		});
 
 		test('Commits', async () => {
-			const { fixture, aicommits } = await createFixture(files);
+			const { fixture, codepitchCommit
+			} = await createFixture(files);
 			const git = await createGit(fixture.path);
 
-			const { stdout } = await aicommits(['hook', 'install']);
+			const { stdout } = await codepitch - commit(['hook', 'install']);
 			expect(stdout).toMatch('Hook installed');
 
 			await git('add', ['data.json']);

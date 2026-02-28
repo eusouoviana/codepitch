@@ -26,14 +26,14 @@ const getCacheDir = (): string => {
 	const home = os.homedir();
 
 	if (platform === 'darwin') {
-		return path.join(home, 'Library', 'Caches', 'aicommits', 'models');
+		return path.join(home, 'Library', 'Caches', 'codepitchCommit', 'models');
 	} else if (platform === 'win32') {
-		return path.join(home, 'AppData', 'Local', 'aicommits', 'models');
+		return path.join(home, 'AppData', 'Local', 'codepitchCommit', 'models');
 	} else {
 		// Linux/Unix
 		const xdgCache = process.env.XDG_CACHE_HOME;
 		const baseCache = xdgCache ? xdgCache : path.join(home, '.cache');
-		return path.join(baseCache, 'aicommits', 'models');
+		return path.join(baseCache, 'codepitchCommit', 'models');
 	}
 };
 

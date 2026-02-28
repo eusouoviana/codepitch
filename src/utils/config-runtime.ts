@@ -38,7 +38,7 @@ const detectProvider = (
 	}
 };
 
-const getConfigPath = () => path.join(os.homedir(), '.aicommits');
+const getConfigPath = () => path.join(os.homedir(), '.codepitchCommit');
 
 const readConfigFile = async (): Promise<RawConfig> => {
 	const configExists = await fileExists(getConfigPath());
@@ -72,7 +72,7 @@ export const getConfig = async (
 		if (suppressErrors) {
 			try {
 				parsedConfig[key] = parser(value);
-			} catch {}
+			} catch { }
 		} else {
 			parsedConfig[key] = parser(value);
 		}

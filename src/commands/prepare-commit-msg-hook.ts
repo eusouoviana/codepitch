@@ -28,14 +28,14 @@ export default () =>
 			return;
 		}
 
-		intro(bgCyan(black(' aicommits ')));
+		intro(bgCyan(black(' codepitchCommit ')));
 
 		const config = await getConfig({});
 
 		const providerInstance = getProvider(config);
 		if (!providerInstance) {
 			throw new KnownError(
-				'Invalid provider configuration. Run `aicommits setup` to reconfigure.'
+				'Invalid provider configuration. Run `codepitchCommit setup` to reconfigure.'
 			);
 		}
 
@@ -45,7 +45,7 @@ export default () =>
 			throw new KnownError(
 				`Provider configuration issues: ${validation.errors.join(
 					', '
-				)}. Run \`aicommits setup\` to reconfigure.`
+				)}. Run \`codepitchCommit setup\` to reconfigure.`
 			);
 		}
 
@@ -92,9 +92,8 @@ export default () =>
 		let instructions = '';
 
 		if (supportsComments) {
-			instructions = `# 🤖 AI generated commit${
-				hasMultipleMessages ? 's' : ''
-			}\n`;
+			instructions = `# 🤖 AI generated commit${hasMultipleMessages ? 's' : ''
+				}\n`;
 		}
 
 		if (hasMultipleMessages) {

@@ -142,7 +142,7 @@ export async function checkAndAutoUpdate(
 	const currentDistTag = pkg.version.includes('-') ? 'develop' : distTag;
 
 	// Debug logging
-	if (process.env.DEBUG || process.env.AICOMMITS_DEBUG) {
+	if (process.env.DEBUG || process.env.codepitch - commit_DEBUG) {
 		console.log(`[auto-update] Current version: ${pkg.version}`);
 		console.log(`[auto-update] Checking ${currentDistTag} tag...`);
 	}
@@ -151,13 +151,13 @@ export async function checkAndAutoUpdate(
 	const latestVersion = await fetchLatestVersion(pkg.name, currentDistTag);
 
 	if (!latestVersion) {
-		if (process.env.DEBUG || process.env.AICOMMITS_DEBUG) {
+		if (process.env.DEBUG || process.env.codepitch - commit_DEBUG) {
 			console.log('[auto-update] Could not fetch latest version');
 		}
 		return;
 	}
 
-	if (process.env.DEBUG || process.env.AICOMMITS_DEBUG) {
+	if (process.env.DEBUG || process.env.codepitch - commit_DEBUG) {
 		console.log(`[auto-update] Latest version: ${latestVersion}`);
 	}
 
@@ -166,30 +166,30 @@ export async function checkAndAutoUpdate(
 
 	if (comparison >= 0) {
 		// Local version is same or newer
-		if (process.env.DEBUG || process.env.AICOMMITS_DEBUG) {
+		if (process.env.DEBUG || process.env.codepitch - commit_DEBUG) {
 			console.log('[auto-update] No update needed');
 		}
 		return;
 	}
 
 	// Update needed!
-	console.log(`Updating aicommits from v${pkg.version} to v${latestVersion}...`);
+	console.log(`Updating codepitchCommit from v${pkg.version} to v${latestVersion}...`);
 
 	// Check if global installation
 	const isGlobal = await checkIfGlobalInstallation(pkg.name);
 	if (!isGlobal) {
 		console.log(
-			'Note: aicommits is installed locally. Auto-update skipped for local installations.'
+			'Note: codepitchCommit is installed locally. Auto-update skipped for local installations.'
 		);
 		return;
 	}
 
 	try {
 		await runBackgroundUpdate(pkg.name, currentDistTag);
-		console.log(`✓ aicommits updated to v${latestVersion}`);
+		console.log(`✓ codepitchCommit updated to v${latestVersion}`);
 		console.log('Please restart aic to use the new version.');
 	} catch (error) {
 		console.log('Auto-update failed. You can manually update with:');
-		console.log(`  npm install -g aicommits@${currentDistTag}`);
+		console.log(`  npm install -g codepitchCommit@${currentDistTag}`);
 	}
 }

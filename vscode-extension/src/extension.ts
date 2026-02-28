@@ -8,38 +8,38 @@ const execAsync = promisify(exec);
 let outputChannel: vscode.OutputChannel;
 const TIMEOUT_MS = 15000;
 let cliInstalled = false;
-const PACKAGE_NAME = 'aicommits';
+const PACKAGE_NAME = 'codepitchCommit';
 
 export function activate(context: vscode.ExtensionContext) {
 	outputChannel = vscode.window.createOutputChannel('AI Commits');
 	outputChannel.appendLine('[Extension] Activating AI Commits extension...');
 
 	const generateCommand = vscode.commands.registerCommand(
-		'aicommits.generate',
+		'codepitchCommit.generate',
 		() => {
-			const config = vscode.workspace.getConfiguration('aicommits');
+			const config = vscode.workspace.getConfiguration('codepitchCommit');
 			const defaultType = config.get<'plain' | 'conventional' | 'gitmoji'>('defaultType', 'plain');
 			return generateCommitMessage(defaultType);
 		},
 	);
 
 	const generateConventionalCommand = vscode.commands.registerCommand(
-		'aicommits.generateConventional',
+		'codepitchCommit.generateConventional',
 		() => generateCommitMessage('conventional'),
 	);
 
 	const generateGitmojiCommand = vscode.commands.registerCommand(
-		'aicommits.generateGitmoji',
+		'codepitchCommit.generateGitmoji',
 		() => generateCommitMessage('gitmoji'),
 	);
 
-	const setupCommand = vscode.commands.registerCommand('aicommits.setup', () =>
+	const setupCommand = vscode.commands.registerCommand('codepitchCommit.setup', () =>
 		openSetupTerminal(),
 	);
 
 	const selectModelCommand = vscode.commands.registerCommand(
-		'aicommits.selectModel',
-		() => openTerminal('aicommits model'),
+		'codepitchCommit.selectModel',
+		() => openTerminal('codepitchCommit model'),
 	);
 
 	context.subscriptions.push(
@@ -61,7 +61,7 @@ async function checkCliOnActivation() {
 
 	if (!cliInstalled) {
 		const action = await vscode.window.showInformationMessage(
-			'AI Commits requires aicommits CLI. Install it now?',
+			'AI Commits requires codepitchCommit CLI. Install it now?',
 			'Install',
 			'Later',
 		);
@@ -76,7 +76,7 @@ async function checkCliOnActivation() {
 
 async function getCliVersion(): Promise<string | null> {
 	try {
-		const { stdout } = await execAsync('aicommits --version');
+		const { stdout } = await execAsync('codepitchCommit --version');
 		const version = stdout.trim().replace(/^v/, '');
 		outputChannel.appendLine(`[CLI] Detected version: ${version}`);
 		return version;
@@ -152,7 +152,7 @@ async function checkForCliUpdate(): Promise<void> {
 	outputChannel.appendLine(`[Update Check] Update available! Showing notification...`);
 
 	const action = await vscode.window.showInformationMessage(
-		`A new version of aicommits CLI is available (v${latestVersion}). Update now?`,
+		`A new version of codepitchCommit CLI is available (v${latestVersion}). Update now?`,
 		'Update',
 		'Later',
 	);
@@ -163,17 +163,17 @@ async function checkForCliUpdate(): Promise<void> {
 		const terminal = vscode.window.createTerminal({ name: 'AI Commits Update' });
 		terminal.show();
 		terminal.sendText(`npm install -g ${PACKAGE_NAME}@${distTag}`);
-		vscode.window.showInformationMessage('Updating aicommits CLI...');
+		vscode.window.showInformationMessage('Updating codepitchCommit CLI...');
 	}
 }
 
 async function isCliInstalled(): Promise<boolean> {
 	return new Promise((resolve) => {
-		const proc = spawn('which', ['aicommits'], { shell: true });
+		const proc = spawn('which', ['codepitchCommit'], { shell: true });
 		let output = '';
 		proc.stdout.on('data', (data) => { output += data.toString(); });
 		proc.on('close', (code) => {
-			outputChannel.appendLine(`[CLI Check] which aicommits exit code: ${code}, output: ${output.trim()}`);
+			outputChannel.appendLine(`[CLI Check] which codepitchCommit exit code: ${code}, output: ${output.trim()}`);
 			resolve(code === 0);
 		});
 		proc.on('error', (err) => {
@@ -187,10 +187,10 @@ async function installCli(): Promise<boolean> {
 	return new Promise((resolve) => {
 		const terminal = vscode.window.createTerminal({ name: 'AI Commits Setup' });
 		terminal.show();
-		terminal.sendText('npm install -g aicommits@develop && aicommits setup');
+		terminal.sendText('npm install -g codepitchCommit@develop && codepitchCommit setup');
 
 		vscode.window.showInformationMessage(
-			'Installing aicommits... Complete the setup in the terminal, then try again.',
+			'Installing codepitchCommit... Complete the setup in the terminal, then try again.',
 			'OK',
 		);
 
@@ -209,7 +209,7 @@ async function ensureCliInstalled(): Promise<boolean> {
 	}
 
 	const action = await vscode.window.showErrorMessage(
-		'aicommits CLI is not installed. Install it now?',
+		'codepitchCommit CLI is not installed. Install it now?',
 		'Install',
 		'Cancel',
 	);
@@ -227,8 +227,8 @@ async function generateCommitMessage(
 		return;
 	}
 
-	const config = vscode.workspace.getConfiguration('aicommits');
-	const cliPath = config.get<string>('path', 'aicommits');
+	const config = vscode.workspace.getConfiguration('codepitchCommit');
+	const cliPath = config.get<string>('path', 'codepitchCommit');
 	const autoCommit = config.get<boolean>('autoCommit', false);
 
 	const workspaceFolders = vscode.workspace.workspaceFolders;
@@ -316,7 +316,7 @@ function openSetupTerminal() {
 	});
 
 	terminal.show();
-	terminal.sendText('aicommits setup');
+	terminal.sendText('codepitchCommit setup');
 }
 
 function openTerminal(command: string) {
@@ -387,4 +387,4 @@ async function commitWithMessage(repo: any, message: string) {
 	}
 }
 
-export function deactivate() {}
+export function deactivate() { }
