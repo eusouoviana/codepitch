@@ -18,7 +18,7 @@ export const getCommitMessage = async (
 	messages: string[],
 	skipConfirm: boolean
 ): Promise<string | null> => {
-	const { select, confirm, isCancel } = await import('@clack/prompts');
+	const { select, confirm, isCancel, note } = await import('@clack/prompts');
 	const { dim } = await import('kolorist');
 
 	// Check if interactive prompts are available
@@ -36,7 +36,10 @@ export const getCommitMessage = async (
 			throw new KnownError('Interactive terminal required for commit message confirmation. Use --yes flag to skip confirmation.');
 		}
 
-		console.log(`\n\x1b[1m${message}\x1b[0m\n`);
+		const [title, ...bodyLines] = message.split('\n');
+		const body = bodyLines.join('\n').trim();
+		const preview = body ? `${title}\n\n${body}` : title;
+		note(preview, 'Commit message');
 		const confirmed = await confirm({
 			message: 'Use this commit message?',
 		});
@@ -55,8 +58,20 @@ export const getCommitMessage = async (
 
 	const selected = await select({
 		message: `Pick a commit message to use: ${dim('(Ctrl+c to exit)')}`,
-		options: messages.map((value) => ({ label: value, value })),
+		options: messages.map((value) => ({
+			label: value.split('\n')[0],
+			value,
+		})),
 	});
 
-	return isCancel(selected) ? null : (selected as string);
+	if (isCancel(selected)) return null;
+
+	const full = selected as string;
+	const [title, ...bodyLines] = full.split('\n');
+	const body = bodyLines.join('\n').trim();
+	if (body) {
+		note(`${title}\n\n${body}`, 'Commit message');
+	}
+
+	return full;
 };

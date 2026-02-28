@@ -3,7 +3,7 @@ import { createOpenAI } from '@ai-sdk/openai';
 import { createOpenAICompatible } from '@ai-sdk/openai-compatible';
 import { KnownError } from './error.js';
 import type { CommitType } from './config-types.js';
-import { generatePrompt, commitTypeFormats } from './prompt.js';
+import { generatePrompt, generateBodyPrompt, commitTypeFormats } from './prompt.js';
 
 /**
  * Extracts the actual response from reasoning model outputs.
@@ -24,7 +24,7 @@ const extractResponseFromReasoning = (message: string): string => {
 	return cleaned;
 };
 
-const sanitizeMessage = (message: string) => {
+const sanitizeTitle = (message: string) => {
 	// First, extract response from reasoning models if present
 	let processed = extractResponseFromReasoning(message);
 
@@ -39,7 +39,15 @@ const sanitizeMessage = (message: string) => {
  	return sanitized;
 };
 
-const deduplicateMessages = (array: string[]) => Array.from(new Set(array));
+const sanitizeBody = (message: string) => {
+	let processed = extractResponseFromReasoning(message);
+	return processed
+		.trim()
+		.replace(/^["'`]|["'`]$/g, '')
+		.replace(/^<[^>]*>\s*/, '');
+};
+
+const deduplicateTitles = (array: string[]) => Array.from(new Set(array));
 
 type ServiceTier = 'auto' | 'flex' | 'priority' | 'default';
 
@@ -73,7 +81,7 @@ const shortenCommitMessage = async (
 			...(providerOptions && { providerOptions }),
 		});
 		clearTimeout(timeoutId);
-		return sanitizeMessage(result.text);
+		return sanitizeTitle(result.text);
 	} catch (error) {
 		clearTimeout(timeoutId);
 		throw error;
@@ -113,55 +121,78 @@ export const generateCommitMessage = async (
 
 		const providerOptions = buildProviderOptions(baseUrl, serviceTier);
 
-		const promises = Array.from({ length: completions }, () =>
+		const commonOpts = {
+			temperature: 0.4,
+			maxRetries: 2,
+			...(providerOptions && { providerOptions }),
+		};
+
+		// Generate titles
+		const titlePromises = Array.from({ length: completions }, () =>
 			generateText({
 				model: provider(model),
 				system: generatePrompt(locale, maxLength, type, customPrompt),
 				prompt: diff,
-				temperature: 0.4,
-				maxRetries: 2,
 				maxOutputTokens: 2000,
-				...(providerOptions && { providerOptions }),
+				...commonOpts,
 			}).finally(() => clearTimeout(timeoutId))
 		);
-		const results = await Promise.all(promises);
-		let texts = results.map((r) => r.text);
-		let messages = deduplicateMessages(
-			texts.map((text: string) => sanitizeMessage(text))
+		const titleResults = await Promise.all(titlePromises);
+
+		if (serviceTier) {
+			const actual = (titleResults[0] as any).providerMetadata?.openai?.serviceTier;
+			console.log(`  ⚡ service_tier: requested=${serviceTier}, response=${actual || 'n/a'}`);
+		}
+
+		let titles = deduplicateTitles(
+			titleResults.map((r) => sanitizeTitle(r.text))
 		);
 
-		// Shorten messages that exceed maxLength
+		// Shorten titles that exceed maxLength
 		const MAX_SHORTEN_RETRIES = 3;
 		for (let retry = 0; retry < MAX_SHORTEN_RETRIES; retry++) {
 			let needsShortening = false;
-			const shortenedMessages = await Promise.all(
-				messages.map(async (msg) => {
-					if (msg.length <= maxLength) {
-						return msg;
-					}
+			const shortened = await Promise.all(
+				titles.map(async (msg) => {
+					if (msg.length <= maxLength) return msg;
 					needsShortening = true;
 					try {
 						return await shortenCommitMessage(provider, model, msg, maxLength, timeout, providerOptions);
-					} catch (error) {
-						// If shortening fails, keep the original and continue
+					} catch {
 						return msg;
 					}
 				})
 			);
-			messages = deduplicateMessages(shortenedMessages);
+			titles = deduplicateTitles(shortened);
 			if (!needsShortening) break;
 		}
 
+		// Generate body (single call, shared across all title options)
+		const bodyResult = await generateText({
+			model: provider(model),
+			system: generateBodyPrompt(locale),
+			prompt: diff,
+			maxOutputTokens: 1000,
+			...commonOpts,
+		});
+		const body = sanitizeBody(bodyResult.text);
+
+		// Combine title + body
+		const messages = titles.map((title) =>
+			body ? `${title}\n\n${body}` : title
+		);
+
+		const allResults = [...titleResults, bodyResult];
 		const usage = {
-			prompt_tokens: results.reduce(
+			prompt_tokens: allResults.reduce(
 				(sum, r) => sum + ((r.usage as any).promptTokens || 0),
 				0
 			),
-			completion_tokens: results.reduce(
+			completion_tokens: allResults.reduce(
 				(sum, r) => sum + ((r.usage as any).completionTokens || 0),
 				0
 			),
-			total_tokens: results.reduce(
+			total_tokens: allResults.reduce(
 				(sum, r) => sum + ((r.usage as any).totalTokens || 0),
 				0
 			),
@@ -233,37 +264,58 @@ export const combineCommitMessages = async (
 		const timeoutId = setTimeout(() => abortController.abort(), timeout);
 		const providerOptions = buildProviderOptions(baseUrl, serviceTier);
 
-		const system = `You are a tool that generates git commit messages. Your task is to combine multiple commit messages into one.
-
-Input: Several commit messages separated by newlines.
-Output: A single commit message starting with type like 'feat:' or 'fix:'.
-
-Do not add thanks, explanations, or any text outside the commit message.`;
-
-		const result = await generateText({
-			model: provider(model),
-			system,
-			prompt: messages.join('\n'),
+		const commonOpts = {
 			temperature: 0.4,
 			maxRetries: 2,
-			maxOutputTokens: 2000,
 			...(providerOptions && { providerOptions }),
+		};
+
+		const titleSystem = `You are a tool that generates git commit messages. Your task is to combine multiple commit messages into one.
+
+Input: Several commit messages separated by newlines.
+Output: A single commit title starting with type like 'feat:' or 'fix:'.
+
+Do not add thanks, explanations, or any text outside the commit title.`;
+
+		const titleResult = await generateText({
+			model: provider(model),
+			system: titleSystem,
+			prompt: messages.join('\n'),
+			maxOutputTokens: 2000,
+			...commonOpts,
 		});
 
 		clearTimeout(timeoutId);
 
-		let combinedMessage = sanitizeMessage(result.text);
+		let title = sanitizeTitle(titleResult.text);
 
 		// Shorten if too long
-		if (combinedMessage.length > maxLength) {
+		if (title.length > maxLength) {
 			try {
-				combinedMessage = await shortenCommitMessage(provider, model, combinedMessage, maxLength, timeout, providerOptions);
-			} catch (error) {
+				title = await shortenCommitMessage(provider, model, title, maxLength, timeout, providerOptions);
+			} catch {
 				// If shortening fails, keep the original
 			}
 		}
 
-		return { messages: [combinedMessage], usage: result.usage };
+		// Generate body from the original diff messages
+		const bodyResult = await generateText({
+			model: provider(model),
+			system: generateBodyPrompt(locale),
+			prompt: messages.join('\n'),
+			maxOutputTokens: 1000,
+			...commonOpts,
+		});
+		const body = sanitizeBody(bodyResult.text);
+
+		const combined = body ? `${title}\n\n${body}` : title;
+		const totalUsage = {
+			promptTokens: ((titleResult.usage as any).promptTokens || 0) + ((bodyResult.usage as any).promptTokens || 0),
+			completionTokens: ((titleResult.usage as any).completionTokens || 0) + ((bodyResult.usage as any).completionTokens || 0),
+			totalTokens: ((titleResult.usage as any).totalTokens || 0) + ((bodyResult.usage as any).totalTokens || 0),
+		};
+
+		return { messages: [combined], usage: totalUsage };
 	} catch (error) {
 		const errorAsAny = error as any;
 
