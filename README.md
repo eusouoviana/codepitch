@@ -3,8 +3,9 @@
     <h1 align="center">Codepitch</h1>
   </div>
   <p>AI-powered CLI that writes your git commit messages. Generates both a title and a descriptive body automatically.</p>
-  <a href="https://www.npmjs.com/package/@unfoldingcx/codepitch"><img src="https://img.shields.io/npm/v/@unfoldingcx/codepitch" alt="Current version"></a>
-  <a href="https://www.npmjs.com/package/@unfoldingcx/codepitch"><img src="https://img.shields.io/npm/dt/@unfoldingcx/codepitch" alt="Downloads"></a>
+  <a href="https://github.com/unfoldingcx/codepitch"><img src="https://img.shields.io/github/license/unfoldingcx/codepitch" alt="License"></a>
+  <a href="https://github.com/unfoldingcx/codepitch/releases"><img src="https://img.shields.io/github/v/release/unfoldingcx/codepitch?include_prereleases" alt="Release"></a>
+  <a href="https://github.com/unfoldingcx/codepitch"><img src="https://img.shields.io/github/last-commit/unfoldingcx/codepitch" alt="Last commit"></a>
 </div>
 
 ---
