@@ -1,5 +1,5 @@
 {
-	"name": "codepitch-commit",
+	"name": "@unfoldingcx/codepitch",
 	"version": "1.0.0",
 	"description": "Writes your git commit messages for you with AI",
 	"keywords": [
@@ -10,10 +10,9 @@
 		"codepitch",
 		"codepitch-commit"
 	],
-	"license": "MIT",
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/eusouoviana/codepitch.git"
+		"url": "git+https://github.com/unfoldingcx/codepitch.git"
 	},
 	"author": "Pedro Viana (@eusouoviana)",
 	"type": "module",
