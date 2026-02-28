@@ -41,12 +41,23 @@ const sanitizeMessage = (message: string) => {
 
 const deduplicateMessages = (array: string[]) => Array.from(new Set(array));
 
+type ServiceTier = 'auto' | 'flex' | 'priority' | 'default';
+
+const buildProviderOptions = (
+	baseUrl: string,
+	serviceTier?: ServiceTier
+) => {
+	if (!serviceTier || baseUrl !== 'https://api.openai.com/v1') return undefined;
+	return { openai: { serviceTier } } as const;
+};
+
 const shortenCommitMessage = async (
 	provider: any,
 	model: string,
 	message: string,
 	maxLength: number,
-	timeout: number
+	timeout: number,
+	providerOptions?: ReturnType<typeof buildProviderOptions>
 ) => {
 	const abortController = new AbortController();
 	const timeoutId = setTimeout(() => abortController.abort(), timeout);
@@ -59,6 +70,7 @@ const shortenCommitMessage = async (
 			temperature: 0.2,
 			maxRetries: 2,
 			maxOutputTokens: 500,
+			...(providerOptions && { providerOptions }),
 		});
 		clearTimeout(timeoutId);
 		return sanitizeMessage(result.text);
@@ -78,7 +90,8 @@ export const generateCommitMessage = async (
 	maxLength: number,
 	type: CommitType,
 	timeout: number,
-	customPrompt?: string
+	customPrompt?: string,
+	serviceTier?: ServiceTier
 ) => {
 	if (process.env.DEBUG) {
 		console.log('Diff being sent to AI:');
@@ -98,6 +111,8 @@ export const generateCommitMessage = async (
 		const abortController = new AbortController();
 		const timeoutId = setTimeout(() => abortController.abort(), timeout);
 
+		const providerOptions = buildProviderOptions(baseUrl, serviceTier);
+
 		const promises = Array.from({ length: completions }, () =>
 			generateText({
 				model: provider(model),
@@ -106,6 +121,7 @@ export const generateCommitMessage = async (
 				temperature: 0.4,
 				maxRetries: 2,
 				maxOutputTokens: 2000,
+				...(providerOptions && { providerOptions }),
 			}).finally(() => clearTimeout(timeoutId))
 		);
 		const results = await Promise.all(promises);
@@ -125,7 +141,7 @@ export const generateCommitMessage = async (
 					}
 					needsShortening = true;
 					try {
-						return await shortenCommitMessage(provider, model, msg, maxLength, timeout);
+						return await shortenCommitMessage(provider, model, msg, maxLength, timeout, providerOptions);
 					} catch (error) {
 						// If shortening fails, keep the original and continue
 						return msg;
@@ -200,7 +216,8 @@ export const combineCommitMessages = async (
 	maxLength: number,
 	type: CommitType,
 	timeout: number,
-	customPrompt?: string
+	customPrompt?: string,
+	serviceTier?: ServiceTier
 ) => {
 	try {
 		const provider =
@@ -214,6 +231,7 @@ export const combineCommitMessages = async (
 
 		const abortController = new AbortController();
 		const timeoutId = setTimeout(() => abortController.abort(), timeout);
+		const providerOptions = buildProviderOptions(baseUrl, serviceTier);
 
 		const system = `You are a tool that generates git commit messages. Your task is to combine multiple commit messages into one.
 
@@ -229,6 +247,7 @@ Do not add thanks, explanations, or any text outside the commit message.`;
 			temperature: 0.4,
 			maxRetries: 2,
 			maxOutputTokens: 2000,
+			...(providerOptions && { providerOptions }),
 		});
 
 		clearTimeout(timeoutId);
@@ -238,7 +257,7 @@ Do not add thanks, explanations, or any text outside the commit message.`;
 		// Shorten if too long
 		if (combinedMessage.length > maxLength) {
 			try {
-				combinedMessage = await shortenCommitMessage(provider, model, combinedMessage, maxLength, timeout);
+				combinedMessage = await shortenCommitMessage(provider, model, combinedMessage, maxLength, timeout, providerOptions);
 			} catch (error) {
 				// If shortening fails, keep the original
 			}

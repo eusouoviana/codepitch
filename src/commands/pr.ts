@@ -185,6 +185,10 @@ export default command(
 
 			const startTime = Date.now();
 
+			const providerOptions = config['service-tier'] && baseUrl === 'https://api.openai.com/v1'
+				? { openai: { serviceTier: config['service-tier'] } } as const
+				: undefined;
+
 			// Generate PR title
 			const titleResult = await generateText({
 				model: aiProvider(config.model) as any,
@@ -192,6 +196,7 @@ export default command(
 					'Generate a concise PR title based on the following git diff. The title should be under 72 characters.',
 				prompt: diff,
 				maxRetries: 2,
+				...(providerOptions && { providerOptions }),
 			});
 
 			const title = titleResult.text;
@@ -203,6 +208,7 @@ export default command(
 					'Generate a concise PR description based on the following git diff. Format using Markdown with headings like ### Summary, ### Changes, ### Review Notes. Provide a high-level summary of the changes, what was implemented or fixed, and any specific details reviewers should consider. Avoid listing individual files.',
 				prompt: diff,
 				maxRetries: 2,
+				...(providerOptions && { providerOptions }),
 			});
 
 			const body = bodyResult.text;

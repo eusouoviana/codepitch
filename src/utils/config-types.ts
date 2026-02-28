@@ -77,6 +77,18 @@ const configParsers = {
 
 		return parsed;
 	},
+	'service-tier'(tier?: string) {
+		if (!tier) {
+			return undefined;
+		}
+		const validTiers = ['auto', 'flex', 'priority', 'default'] as const;
+		parseAssert(
+			'service-tier',
+			validTiers.includes(tier as any),
+			`Must be one of: ${validTiers.join(', ')}`
+		);
+		return tier as 'auto' | 'flex' | 'priority' | 'default';
+	},
 	'max-length'(maxLength?: string) {
 		if (!maxLength) {
 			return 72;
@@ -107,6 +119,7 @@ export type ValidConfig = {
 	model: string;
 	provider: string | undefined;
 	timeout: number | undefined;
+	'service-tier': 'auto' | 'flex' | 'priority' | 'default' | undefined;
 };
 
 export { configParsers, type ConfigKeys, type RawConfig };

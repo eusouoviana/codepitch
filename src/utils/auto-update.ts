@@ -142,7 +142,7 @@ export async function checkAndAutoUpdate(
 	const currentDistTag = pkg.version.includes('-') ? 'develop' : distTag;
 
 	// Debug logging
-	if (process.env.DEBUG || process.env.codepitch - commit_DEBUG) {
+	if (process.env.DEBUG) {
 		console.log(`[auto-update] Current version: ${pkg.version}`);
 		console.log(`[auto-update] Checking ${currentDistTag} tag...`);
 	}
@@ -151,13 +151,13 @@ export async function checkAndAutoUpdate(
 	const latestVersion = await fetchLatestVersion(pkg.name, currentDistTag);
 
 	if (!latestVersion) {
-		if (process.env.DEBUG || process.env.codepitch - commit_DEBUG) {
+		if (process.env.DEBUG) {
 			console.log('[auto-update] Could not fetch latest version');
 		}
 		return;
 	}
 
-	if (process.env.DEBUG || process.env.codepitch - commit_DEBUG) {
+	if (process.env.DEBUG) {
 		console.log(`[auto-update] Latest version: ${latestVersion}`);
 	}
 
@@ -166,7 +166,7 @@ export async function checkAndAutoUpdate(
 
 	if (comparison >= 0) {
 		// Local version is same or newer
-		if (process.env.DEBUG || process.env.codepitch - commit_DEBUG) {
+		if (process.env.DEBUG) {
 			console.log('[auto-update] No update needed');
 		}
 		return;

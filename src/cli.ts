@@ -4,7 +4,7 @@ globalThis.AI_SDK_LOG_WARNINGS = false;
 import { cli } from 'cleye';
 import pkg from '../package.json';
 const { description, version } = pkg;
-import codepitchCommit from './commands/codepitchCommit.js';
+import codepitchCommit from './commands/aicommits.js';
 import prepareCommitMessageHook from './commands/prepare-commit-msg-hook.js';
 import configCommand from './commands/config.js';
 import setupCommand from './commands/setup.js';
@@ -29,7 +29,7 @@ const rawArgv = process.argv.slice(2);
 
 cli(
 	{
-		name: 'codepitchCommit',
+		name: 'codepitch',
 
 		/**
 		 * Since this is a wrapper around `git commit`,
@@ -112,7 +112,7 @@ cli(
 		if (isCalledFromGitHook) {
 			prepareCommitMessageHook();
 		} else {
-			codepitch - commit(
+			codepitchCommit(
 				argv.flags.generate,
 				argv.flags.exclude,
 				argv.flags.all,

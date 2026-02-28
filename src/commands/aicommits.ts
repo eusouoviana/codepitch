@@ -37,7 +37,7 @@ export default async (
 	rawArgv: string[]
 ) =>
 	(async () => {
-		intro(bgCyan(black(' codepitchCommit ')));
+		intro(bgCyan(black(' codepitch ')));
 
 		await assertGitRepo();
 
@@ -78,13 +78,13 @@ export default async (
 		if (!providerInstance) {
 			const isInteractive = process.stdout.isTTY && !process.env.CI;
 			if (isInteractive) {
-				console.log("Welcome to codepitchCommit! Let's set up your AI provider.");
-				console.log('Run `codepitchCommit setup` to configure your provider.');
-				outro('Setup required. Please run: codepitchCommit setup');
+				console.log("Welcome to codepitch! Let's set up your AI provider.");
+				console.log('Run `codepitch setup` to configure your provider.');
+				outro('Setup required. Please run: codepitch setup');
 				return;
 			} else {
 				throw new KnownError(
-					'No configuration found. Run `codepitchCommit setup` in an interactive terminal, or set environment variables (OPENAI_API_KEY, etc.)'
+					'No configuration found. Run `codepitch setup` in an interactive terminal, or set environment variables (OPENAI_API_KEY, etc.)'
 				);
 			}
 		}
@@ -99,7 +99,7 @@ export default async (
 			throw new KnownError(
 				`Provider configuration issues: ${validation.errors.join(
 					', '
-				)}. Run \`codepitchCommit setup\` to reconfigure.`
+				)}. Run \`codepitch setup\` to reconfigure.`
 			);
 		}
 
@@ -161,7 +161,8 @@ export default async (
 							config['max-length'],
 							config.type,
 							timeout,
-							customPrompt
+							customPrompt,
+							config['service-tier']
 						);
 						chunkMessages.push(...result.messages);
 						if (result.usage) {
@@ -184,7 +185,8 @@ export default async (
 					config['max-length'],
 					config.type,
 					timeout,
-					customPrompt
+					customPrompt,
+					config['service-tier']
 				);
 				messages = combineResult.messages;
 				if (combineResult.usage) {
@@ -215,7 +217,8 @@ export default async (
 					config['max-length'],
 					config.type,
 					timeout,
-					customPrompt
+					customPrompt,
+					config['service-tier']
 				);
 				messages = result.messages;
 				usage = result.usage;
