@@ -1,8 +1,8 @@
-import { execa } from 'execa';
+import { exec } from './exec.js';
 import { KnownError } from './error.js';
 
 export const assertGitRepo = async () => {
-	const { stdout, failed } = await execa(
+	const { stdout, failed } = await exec(
 		'git',
 		['rev-parse', '--show-toplevel'],
 		{ reject: false }
@@ -41,7 +41,7 @@ export const getStagedDiff = async (excludeFiles?: string[]) => {
 	const diffCached = ['diff', '--cached', '--diff-algorithm=minimal'];
 
 	// First, get all staged files without any excludes
-	const { stdout: allFilesOutput } = await execa('git', [
+	const { stdout: allFilesOutput } = await exec('git', [
 		...diffCached,
 		'--name-only',
 		...(excludeFiles ? excludeFiles.map(excludeFromDiff) : []),
@@ -69,7 +69,7 @@ export const getStagedDiff = async (excludeFiles?: string[]) => {
 	];
 
 	// Get files after applying excludes
-	const { stdout: files } = await execa('git', [
+	const { stdout: files } = await exec('git', [
 		...diffCached,
 		'--name-only',
 		...excludes,
@@ -79,7 +79,7 @@ export const getStagedDiff = async (excludeFiles?: string[]) => {
 		return;
 	}
 
-	const { stdout: diff } = await execa('git', [
+	const { stdout: diff } = await exec('git', [
 		...diffCached,
 		...excludes,
 	]);
@@ -97,7 +97,7 @@ export const getStagedDiffForFiles = async (files: string[], excludeFiles?: stri
 		...(excludeFiles ? excludeFiles.map(excludeFromDiff) : []),
 	];
 
-	const { stdout: diff } = await execa('git', [
+	const { stdout: diff } = await exec('git', [
 		...diffCached,
 		'--',
 		...files,

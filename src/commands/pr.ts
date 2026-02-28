@@ -1,5 +1,5 @@
 import { command } from 'cleye';
-import { execa } from 'execa';
+import { exec } from '../utils/exec.js';
 import { black, green, bgCyan } from 'kolorist';
 import { intro, outro, spinner, confirm, isCancel } from '@clack/prompts';
 import { assertGitRepo } from '../utils/git.js';
@@ -85,7 +85,7 @@ export default command(
 			await assertGitRepo();
 
 			// Get current branch
-			const { stdout: currentBranch } = await execa('git', [
+			const { stdout: currentBranch } = await exec('git', [
 				'branch',
 				'--show-current',
 			]);
@@ -94,7 +94,7 @@ export default command(
 			}
 
 			// Get repo URL
-			const { stdout: remoteUrl } = await execa('git', [
+			const { stdout: remoteUrl } = await exec('git', [
 				'remote',
 				'get-url',
 				'origin',
@@ -105,7 +105,7 @@ export default command(
 			// Get default branch from git remote
 			let defaultBranch = 'main';
 			try {
-				const { stdout } = await execa('git', [
+				const { stdout } = await exec('git', [
 					'symbolic-ref',
 					'refs/remotes/origin/HEAD',
 				]);
@@ -122,7 +122,7 @@ export default command(
 			// Get diff from default branch to current branch
 			let diff;
 			try {
-				const { stdout } = await execa('git', [
+				const { stdout } = await exec('git', [
 					'diff',
 					`origin/${defaultBranch}..HEAD`,
 				]);
@@ -236,7 +236,7 @@ export default command(
 			pushing.start(`Pushing branch to ${provider}`);
 
 			try {
-				await execa('git', ['push', '-u', 'origin', currentBranch.trim()]);
+				await exec('git', ['push', '-u', 'origin', currentBranch.trim()]);
 				pushing.stop(`Branch pushed to ${provider}`);
 			} catch (error) {
 				pushing.stop('Failed to push branch');
@@ -264,7 +264,7 @@ export default command(
 						: process.platform === 'win32'
 							? 'start'
 							: 'xdg-open';
-				await execa(openCmd, [prUrl]);
+				await exec(openCmd, [prUrl]);
 				creating.stop('PR creation page opened in browser');
 				outro(
 					green('PR creation page opened! Please review and submit the PR.')

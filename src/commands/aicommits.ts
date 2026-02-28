@@ -1,4 +1,4 @@
-import { execa } from 'execa';
+import { exec } from '../utils/exec.js';
 import { black, dim, green, red, yellow, bgCyan } from 'kolorist';
 import { copyToClipboard as copyMessage } from '../utils/clipboard.js';
 import {
@@ -45,7 +45,7 @@ export default async (
 
 		if (stageAll) {
 			// This should be equivalent behavior to `git commit --all`
-			await execa('git', ['add', '--update']);
+			await exec('git', ['add', '--update']);
 		}
 
 		detectingFiles.start('Detecting staged files');
@@ -261,7 +261,7 @@ export default async (
 			if (noVerify) {
 				commitArgs.push('--no-verify');
 			}
-			await execa('git', ['commit', ...commitArgs, ...rawArgv], {
+			await exec('git', ['commit', ...commitArgs, ...rawArgv], {
 				stdio: 'inherit',
 				cleanup: true,
 				timeout: 10000

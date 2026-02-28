@@ -1,4 +1,4 @@
-import { execa } from 'execa';
+import { exec } from './exec.js';
 
 /**
  * Copy text to the system clipboard using native CLI tools.
@@ -10,14 +10,14 @@ export async function copyToClipboard(message: string): Promise<boolean> {
 	try {
 		if (process.platform === 'darwin') {
 			// macOS - use pbcopy
-			await execa('pbcopy', { input: message });
+			await exec('pbcopy', [], { input: message });
 		} else if (process.platform === 'win32') {
 			// Windows - use clip
-			await execa('clip', { input: message });
+			await exec('clip', [], { input: message });
 		} else {
 			// Linux - try xclip first, fallback to xsel
-			await execa('xclip', ['-selection', 'clipboard'], { input: message }).catch(
-				() => execa('xsel', ['--clipboard', '--input'], { input: message }),
+			await exec('xclip', ['-selection', 'clipboard'], { input: message }).catch(
+				() => exec('xsel', ['--clipboard', '--input'], { input: message }),
 			);
 		}
 		return true;
