@@ -56,8 +56,14 @@ export const getCommitMessage = async (
 		throw new KnownError('Interactive terminal required for commit message selection. Use --yes flag to skip selection and use the first message.');
 	}
 
+	// Show shared body once above the picker
+	const sharedBody = messages[0].split('\n').slice(1).join('\n').trim();
+	if (sharedBody) {
+		note(sharedBody, 'Commit body (shared)');
+	}
+
 	const selected = await select({
-		message: `Pick a commit message to use: ${dim('(Ctrl+c to exit)')}`,
+		message: `Pick a commit title to use: ${dim('(Ctrl+c to exit)')}`,
 		options: messages.map((value) => ({
 			label: value.split('\n')[0],
 			value,
@@ -66,12 +72,5 @@ export const getCommitMessage = async (
 
 	if (isCancel(selected)) return null;
 
-	const full = selected as string;
-	const [title, ...bodyLines] = full.split('\n');
-	const body = bodyLines.join('\n').trim();
-	if (body) {
-		note(`${title}\n\n${body}`, 'Commit message');
-	}
-
-	return full;
+	return selected as string;
 };
