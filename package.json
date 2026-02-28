@@ -25,7 +25,7 @@
 		"cpcm": "dist/cli.mjs"
 	},
 	"scripts": {
-		"build": "pkgroll --minify",
+		"build": "pkgroll --minify 2>&1 | { grep -v 'Circular dependency:' || true; }",
 		"lint": "",
 		"type-check": "tsc",
 		"test": "tsx tests",
