@@ -15,6 +15,12 @@ Transform raw git commits into polished, audience-ready release notes using Open
 - **AI-Powered Narratives** - Converts technical commits into human-readable release notes
 - **Multiple Personas** - Generate notes for customers, developers, executives, or sales teams
 - **Tone Customization** - Professional, friendly, technical, or executive tones
+- **Context Files** - Add product/audience context for more accurate AI output
+- **Weekly Summaries** - Generate engineering summaries for stakeholders
+- **Cost Estimation** - Preview API costs before generating
+- **CI/CD Integration** - Pre-built GitHub Actions workflow templates
+- **GitHub Publishing** - Publish release notes directly to GitHub Releases
+- **Version Suggestions** - Get next version recommendations based on commits
 - **Dry-Run Mode** - Preview commits without making API calls
 - **Git-Native** - Works with tags, branches, commit ranges, or time-based windows
 - **Zero Config** - Works out of the box with sensible defaults
@@ -136,6 +142,190 @@ bun run src/index.ts releases generate --since-last-tag --dry-run
 | `--output <file>` | Write output to file | - |
 | `--dry-run` | Preview without calling AI API | - |
 
+### `codepitch context`
+
+Manage context files to improve AI generation accuracy.
+
+```bash
+# Add a context file
+bun run src/index.ts context add README.md --name product --type product
+
+# List context files
+bun run src/index.ts context list
+
+# Show context content
+bun run src/index.ts context show product
+
+# Remove a context file
+bun run src/index.ts context remove product
+```
+
+**Context Types:**
+- `product` - Product information and features
+- `audience` - Target audience details
+- `glossary` - Domain-specific terminology
+- `brand` - Brand voice and style guidelines
+- `competitors` - Competitor information
+
+**Subcommands:**
+
+| Command | Description |
+|---------|-------------|
+| `add <file>` | Add a context file |
+| `list`, `ls` | List all context files |
+| `show [name]` | Show content of context file(s) |
+| `remove <name>`, `rm` | Remove a context file |
+
+### `codepitch summary`
+
+Generate engineering summaries for stakeholders.
+
+```bash
+# Generate weekly summary
+bun run src/index.ts summary weekly
+
+# Custom time range and format
+bun run src/index.ts summary weekly --days 14 --format slack
+
+# With specific tone
+bun run src/index.ts summary weekly --tone executive --output weekly.md
+
+# Preview without API call
+bun run src/index.ts summary weekly --dry-run
+```
+
+**Options:**
+
+| Option | Description | Values |
+|--------|-------------|--------|
+| `--days <number>` | Number of days to include | Default: 7 |
+| `--tone <tone>` | Output tone | `professional`, `friendly`, `technical`, `executive` |
+| `--format <format>` | Output format | `markdown`, `slack`, `email` |
+| `--output <file>` | Write output to file | - |
+| `--dry-run` | Preview without calling AI API | - |
+
+### `codepitch cost`
+
+Estimate API costs before generating release notes.
+
+```bash
+# Estimate cost from last tag
+bun run src/index.ts cost --since-last-tag
+
+# Estimate for specific range
+bun run src/index.ts cost --from v1.0.0 --to v1.1.0
+
+# Different model
+bun run src/index.ts cost --since-last-tag --model gpt-4o
+
+# Output as JSON
+bun run src/index.ts cost --since-last-tag --json
+```
+
+**Options:**
+
+| Option | Description |
+|--------|-------------|
+| `--from <ref>` | Starting reference |
+| `--to <ref>` | Ending reference |
+| `--since-last-tag` | Estimate from last tag to HEAD |
+| `--model <model>` | Model to estimate (`gpt-4o-mini`, `gpt-4o`, `gpt-4-turbo`, `gpt-3.5-turbo`) |
+| `--json` | Output as JSON |
+
+### `codepitch version`
+
+Get version suggestions based on conventional commits.
+
+```bash
+# Get version suggestion
+bun run src/index.ts version
+
+# Output as JSON
+bun run src/index.ts version --json
+
+# Create and push the suggested tag
+bun run src/index.ts version --apply
+```
+
+The command analyzes commits and suggests:
+- **Major** bump for breaking changes
+- **Minor** bump for new features
+- **Patch** bump for fixes and other changes
+
+### `codepitch publish`
+
+Publish release notes directly to GitHub Releases.
+
+```bash
+# Publish release for last tag
+bun run src/index.ts publish
+
+# Publish specific tag
+bun run src/index.ts publish v1.2.0
+
+# Create as draft
+bun run src/index.ts publish --draft
+
+# Update existing release
+bun run src/index.ts publish --update
+
+# Preview without publishing
+bun run src/index.ts publish --dry-run
+```
+
+**Options:**
+
+| Option | Description |
+|--------|-------------|
+| `--from <tag>` | Starting tag for commit range |
+| `--to <tag>` | Ending tag (default: HEAD) |
+| `--tone <tone>` | Output tone |
+| `--persona <persona>` | Target audience |
+| `--draft` | Create as draft release |
+| `--prerelease` | Mark as prerelease |
+| `--update` | Update existing release |
+| `--dry-run` | Preview without publishing |
+
+**Requires:** `GITHUB_TOKEN` environment variable with `repo` scope.
+
+### `codepitch ci`
+
+Generate CI/CD workflow templates.
+
+```bash
+# List available templates
+bun run src/index.ts ci list
+
+# Generate a workflow
+bun run src/index.ts ci generate release
+
+# Preview template
+bun run src/index.ts ci show weekly
+```
+
+**Available Templates:**
+
+| Template | Description |
+|----------|-------------|
+| `release` | Generate release notes when a tag is pushed |
+| `weekly` | Generate weekly engineering summaries |
+| `pr` | Draft release notes on pull requests |
+
+### `codepitch integrations`
+
+Manage external service integrations.
+
+```bash
+# Connect GitHub
+bun run src/index.ts integrations connect github --token ghp_xxx
+
+# Check integration status
+bun run src/index.ts integrations status github
+
+# Disconnect
+bun run src/index.ts integrations disconnect github
+```
+
 ### `codepitch config`
 
 Manage configuration settings.
@@ -161,7 +351,13 @@ Codepitch uses [cosmiconfig](https://github.com/cosmiconfig/cosmiconfig) for con
   "defaultTone": "professional",
   "defaultFormat": "markdown",
   "defaultLanguage": "en",
-  "contextFiles": []
+  "contextFiles": [
+    {
+      "name": "product",
+      "path": "./docs/product.md",
+      "type": "product"
+    }
+  ]
 }
 ```
 
@@ -170,6 +366,7 @@ Codepitch uses [cosmiconfig](https://github.com/cosmiconfig/cosmiconfig) for con
 | Option | Description | Default |
 |--------|-------------|---------|
 | `openaiApiKey` | OpenAI API key (or use `OPENAI_API_KEY` env var) | - |
+| `githubToken` | GitHub token for publishing (or use `GITHUB_TOKEN` env var) | - |
 | `defaultTone` | Default output tone | `professional` |
 | `defaultFormat` | Default output format | `markdown` |
 | `defaultLanguage` | Output language | `en` |
@@ -230,6 +427,33 @@ bun run src/index.ts releases generate --days 30 \
   --persona executives
 ```
 
+### Weekly Team Summary for Slack
+
+```bash
+bun run src/index.ts summary weekly \
+  --days 7 \
+  --format slack \
+  --output slack_summary.md
+```
+
+### Full Release Workflow
+
+```bash
+# 1. Check version suggestion
+bun run src/index.ts version
+
+# 2. Estimate cost
+bun run src/index.ts cost --since-last-tag
+
+# 3. Generate and save notes
+bun run src/index.ts releases generate --since-last-tag \
+  --output RELEASE_NOTES.md
+
+# 4. Apply version and publish
+bun run src/index.ts version --apply
+bun run src/index.ts publish
+```
+
 ### CI/CD Integration
 
 ```yaml
@@ -266,6 +490,14 @@ jobs:
           body_path: RELEASE_NOTES.md
 ```
 
+Or use the built-in CI templates:
+
+```bash
+bun run src/index.ts ci generate release
+bun run src/index.ts ci generate weekly
+bun run src/index.ts ci generate pr
+```
+
 ## Development
 
 ### Setup
@@ -299,13 +531,22 @@ bun build src/index.ts --compile --outfile codepitch
 src/
 ├── index.ts           # CLI entry point
 ├── commands/          # CLI command handlers
-│   ├── init.ts
-│   ├── analyze.ts
-│   ├── releases.ts
-│   └── config.ts
+│   ├── init.ts        # codepitch init
+│   ├── analyze.ts     # codepitch analyze
+│   ├── releases.ts    # codepitch releases generate
+│   ├── context.ts     # codepitch context
+│   ├── summary.ts     # codepitch summary weekly
+│   ├── cost.ts        # codepitch cost
+│   ├── version.ts     # codepitch version
+│   ├── publish.ts     # codepitch publish
+│   ├── ci.ts          # codepitch ci
+│   ├── integrations.ts # codepitch integrations
+│   └── config.ts      # codepitch config
 └── lib/               # Core library modules
     ├── git.ts         # Git operations
-    └── release.ts     # AI release generation
+    ├── release.ts     # AI release generation
+    ├── formatter.ts   # Output formatting
+    └── github.ts      # GitHub API utilities
 ```
 
 ## Contributing
@@ -345,7 +586,7 @@ bun test -t "parseCommit"
 - [ ] Multi-repository support
 - [ ] Custom prompt templates
 - [ ] Localization (multiple languages)
-- [ ] Slack/Discord integration
+- [ ] Slack/Discord direct publishing
 - [ ] Notion/Confluence publishing
 - [ ] Release risk prediction
 - [ ] Historical analytics
